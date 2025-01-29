@@ -9,8 +9,13 @@ import SwiftUI
 
 struct ContentView: View {
     @State var showExchangeInfo = false
+    @State var showSelectCurrency = false
+    @FocusState var topTyping
+    @FocusState var bottomTyping
     @State var topAmount = ""
     @State var bottomAmount = ""
+    @State var topCurrency: CurrencyModel = .silverPiece
+    @State var bottomCurrency: CurrencyModel = .goldPiece
     
     var body: some View {
         ZStack {
@@ -28,17 +33,26 @@ struct ContentView: View {
                 VStack {
                     VStack {
                         HStack {
-                            Image(.silverpiece)
+                            Image(topCurrency.image)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 60)
-                            Text("Silver Piece")
+                            Text(topCurrency.name)
                                 .font(.headline)
                                 .foregroundStyle(.white)
+                        }
+                        .onTapGesture {
+                            showSelectCurrency.toggle()
                         }
                         TextField("Amount", text: $topAmount)
                             .textFieldStyle(.roundedBorder)
                             .padding()
+                            .focused($topTyping)
+                            .onChange(of: topAmount) {
+                                if topTyping {
+                                    bottomAmount = topCurrency.convert(topAmount, to: bottomCurrency)
+                                }
+                            }
                     }
                     Image(systemName: "equal")
                         .font(.largeTitle)
@@ -49,14 +63,23 @@ struct ContentView: View {
                         TextField("Amount", text: $bottomAmount)
                             .textFieldStyle(.roundedBorder)
                             .padding()
+                            .focused($bottomTyping)
+                            .onChange(of: bottomAmount) {
+                                if bottomTyping {
+                                    topAmount = bottomCurrency.convert(bottomAmount, to: topCurrency)
+                                }
+                            }
                         HStack {
-                            Image(.goldpiece)
+                            Image(bottomCurrency.image)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 60)
-                            Text("Gold Piece")
+                            Text(bottomCurrency.name)
                                 .font(.headline)
                                 .foregroundStyle(.white)
+                        }
+                        .onTapGesture {
+                            showSelectCurrency.toggle()
                         }
                     }
                 }
@@ -75,6 +98,9 @@ struct ContentView: View {
                     .padding(.trailing)
                     .sheet(isPresented: $showExchangeInfo) {
                         ExchangeInfo()
+                    }
+                    .sheet(isPresented: $showSelectCurrency) {
+                        SelectCurrency(selectedCurrencyStartingWith: $topCurrency, selectedCurrencyConvertTo: $bottomCurrency)
                     }
                 }
             }

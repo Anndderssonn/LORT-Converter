@@ -9,7 +9,8 @@ import SwiftUI
 
 struct SelectCurrency: View {
     @Environment(\.dismiss) var dismiss
-    @State var selectedCurrency: CurrencyModel?
+    @Binding var selectedCurrencyStartingWith: CurrencyModel
+    @Binding var selectedCurrencyConvertTo: CurrencyModel
     
     var body: some View {
         ZStack {
@@ -20,25 +21,12 @@ struct SelectCurrency: View {
             VStack {
                 Text("Select the currency you are starting with:")
                     .fontWeight(.bold)
-                LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
-                    ForEach(CurrencyModel.allCases) { currency in
-                        if currency == selectedCurrency {
-                            CurrencyIcon(currencyImage: currency.image, currencyName: currency.name)
-                                .shadow(color: .black, radius: 10)
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.white, lineWidth: 1)
-                                }
-                        } else {
-                            CurrencyIcon(currencyImage: currency.image, currencyName: currency.name)
-                                .onTapGesture {
-                                    selectedCurrency = currency
-                                }
-                        }
-                    }
-                }
+                IconGrid(selectedCurrency: $selectedCurrencyStartingWith)
+                    .padding()
                 Text("Select the currency you would like to convert to:")
                     .fontWeight(.bold)
+                IconGrid(selectedCurrency: $selectedCurrencyConvertTo)
+                    .padding()
                 Button("Done") {
                     dismiss()
                 }
@@ -49,10 +37,13 @@ struct SelectCurrency: View {
             }
             .padding()
             .multilineTextAlignment(.center)
+            .foregroundStyle(.black)
         }
     }
 }
 
 #Preview {
-    SelectCurrency(selectedCurrency: .goldPiece)
+    @Previewable @State var topCurrencySelected: CurrencyModel = .silverPenny
+    @Previewable @State var bottomCurrencySelected: CurrencyModel = .goldPenny
+    SelectCurrency(selectedCurrencyStartingWith: $topCurrencySelected, selectedCurrencyConvertTo: $bottomCurrencySelected)
 }
