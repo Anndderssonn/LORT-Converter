@@ -9,6 +9,7 @@ import SwiftUI
 
 enum CurrencyModel: Double, CaseIterable, Identifiable {
     case copperPenny = 6400
+    case bitcoin = 256
     case silverPenny = 64
     case silverPiece = 16
     case goldPenny = 4
@@ -19,6 +20,7 @@ enum CurrencyModel: Double, CaseIterable, Identifiable {
     var image: ImageResource {
         switch self {
         case .copperPenny: return .copperpenny
+        case .bitcoin: return .bitcoin
         case .silverPenny: return .silverpenny
         case .silverPiece: return .silverpiece
         case .goldPenny: return .goldpenny
@@ -29,6 +31,7 @@ enum CurrencyModel: Double, CaseIterable, Identifiable {
     var name: String {
         switch self {
         case .copperPenny: return "Copper Penny"
+        case .bitcoin: return "Bitcoin"
         case .silverPenny: return "Silver Penny"
         case .silverPiece: return "Silver Piece"
         case .goldPenny: return "Gold Penny"
