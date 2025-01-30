@@ -6,16 +6,20 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct ContentView: View {
     @State var showExchangeInfo = false
     @State var showSelectCurrency = false
-    @FocusState var topTyping
-    @FocusState var bottomTyping
     @State var topAmount = ""
     @State var bottomAmount = ""
     @State var topCurrency: CurrencyModel = .silverPiece
     @State var bottomCurrency: CurrencyModel = .goldPiece
+    
+    @FocusState var topTyping
+    @FocusState var bottomTyping
+    
+    let currencyTip = CurrencyTip()
     
     var body: some View {
         ZStack {
@@ -43,16 +47,13 @@ struct ContentView: View {
                         }
                         .onTapGesture {
                             showSelectCurrency.toggle()
+                            currencyTip.invalidate(reason: .actionPerformed)
                         }
+                        .popoverTip(currencyTip, arrowEdge: .bottom)
                         TextField("Amount", text: $topAmount)
                             .textFieldStyle(.roundedBorder)
                             .padding()
                             .focused($topTyping)
-                            .onChange(of: topAmount) {
-                                if topTyping {
-                                    bottomAmount = topCurrency.convert(topAmount, to: bottomCurrency)
-                                }
-                            }
                     }
                     Image(systemName: "equal")
                         .font(.largeTitle)
@@ -64,11 +65,6 @@ struct ContentView: View {
                             .textFieldStyle(.roundedBorder)
                             .padding()
                             .focused($bottomTyping)
-                            .onChange(of: bottomAmount) {
-                                if bottomTyping {
-                                    topAmount = bottomCurrency.convert(bottomAmount, to: topCurrency)
-                                }
-                            }
                         HStack {
                             Image(bottomCurrency.image)
                                 .resizable()
@@ -80,11 +76,21 @@ struct ContentView: View {
                         }
                         .onTapGesture {
                             showSelectCurrency.toggle()
+                            currencyTip.invalidate(reason: .actionPerformed)
                         }
                     }
                 }
                 .padding()
                 .background(.black.opacity(0.5))
+                .keyboardType(.decimalPad)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            hideKeyboard()
+                        }
+                    }
+                }
                 Spacer()
                 HStack {
                     Spacer()
@@ -96,15 +102,38 @@ struct ContentView: View {
                             .foregroundStyle(.white)
                     }
                     .padding(.trailing)
-                    .sheet(isPresented: $showExchangeInfo) {
-                        ExchangeInfo()
-                    }
-                    .sheet(isPresented: $showSelectCurrency) {
-                        SelectCurrency(selectedCurrencyStartingWith: $topCurrency, selectedCurrencyConvertTo: $bottomCurrency)
-                    }
                 }
             }
         }
+        .task {
+            try? Tips.configure()
+        }
+        .onChange(of: topAmount) {
+            if topTyping {
+                bottomAmount = topCurrency.convert(topAmount, to: bottomCurrency)
+            }
+        }
+        .onChange(of: bottomAmount) {
+            if bottomTyping {
+                topAmount = bottomCurrency.convert(bottomAmount, to: topCurrency)
+            }
+        }
+        .onChange(of: topCurrency) {
+            topAmount = bottomCurrency.convert(bottomAmount, to: topCurrency)
+        }
+        .onChange(of: bottomCurrency) {
+            bottomAmount = topCurrency.convert(topAmount, to: bottomCurrency)
+        }
+        .sheet(isPresented: $showExchangeInfo) {
+            ExchangeInfo()
+        }
+        .sheet(isPresented: $showSelectCurrency) {
+            SelectCurrency(selectedCurrencyStartingWith: $topCurrency, selectedCurrencyConvertTo: $bottomCurrency)
+        }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
