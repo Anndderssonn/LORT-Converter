@@ -45,3 +45,8 @@ enum CurrencyModel: Double, CaseIterable, Identifiable {
         return String(format: "%.2f", result)
     }
 }
+
+enum CurrencyPosition {
+    case top
+    case bottom
+}

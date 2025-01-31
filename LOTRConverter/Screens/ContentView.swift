@@ -120,15 +120,22 @@ struct ContentView: View {
         }
         .onChange(of: topCurrency) {
             topAmount = bottomCurrency.convert(bottomAmount, to: topCurrency)
+            UserDefaults.standard.saveCurrency(currency: topCurrency, position: .top)
         }
         .onChange(of: bottomCurrency) {
             bottomAmount = topCurrency.convert(topAmount, to: bottomCurrency)
+            UserDefaults.standard.saveCurrency(currency: bottomCurrency, position: .bottom)
         }
         .sheet(isPresented: $showExchangeInfo) {
             ExchangeInfo()
         }
         .sheet(isPresented: $showSelectCurrency) {
             SelectCurrency(selectedCurrencyStartingWith: $topCurrency, selectedCurrencyConvertTo: $bottomCurrency)
+        }
+        .onAppear {
+            let (loadedTop, loadedBottom) = UserDefaults.standard.loadCurrencies()
+            topCurrency = loadedTop
+            bottomCurrency = loadedBottom
         }
     }
     
