@@ -35,50 +35,15 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .foregroundStyle(.white)
                 VStack {
-                    VStack {
-                        HStack {
-                            Image(topCurrency.image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 60)
-                            Text(topCurrency.name)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        }
-                        .onTapGesture {
-                            showSelectCurrency.toggle()
-                            currencyTip.invalidate(reason: .actionPerformed)
-                        }
-                        .popoverTip(currencyTip, arrowEdge: .bottom)
-                        TextField("Amount", text: $topAmount)
-                            .textFieldStyle(.roundedBorder)
-                            .padding()
-                            .focused($topTyping)
-                    }
+                    ConverterSection(amount: $topAmount, showSelectCurrency: $showSelectCurrency, currentCurrency: topCurrency)
+                        .focused($topTyping)
                     Image(systemName: "equal")
                         .font(.largeTitle)
                         .foregroundStyle(.white)
                         .symbolEffect(.pulse)
                         .padding()
-                    VStack {
-                        TextField("Amount", text: $bottomAmount)
-                            .textFieldStyle(.roundedBorder)
-                            .padding()
-                            .focused($bottomTyping)
-                        HStack {
-                            Image(bottomCurrency.image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 60)
-                            Text(bottomCurrency.name)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        }
-                        .onTapGesture {
-                            showSelectCurrency.toggle()
-                            currencyTip.invalidate(reason: .actionPerformed)
-                        }
-                    }
+                    ConverterSection(amount: $bottomAmount, showSelectCurrency: $showSelectCurrency, currentCurrency: bottomCurrency)
+                        .focused($bottomTyping)
                 }
                 .padding()
                 .background(.black.opacity(0.5))
